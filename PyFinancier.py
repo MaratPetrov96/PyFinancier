@@ -183,18 +183,13 @@ class App(Tk):
             for s,m in self.cur.fetchall():
                 months_[months_dict[m]] = s
         else:
-            self.cur.execute(f'''select sum(RECORDS.summa),strftime('%m',RECORDS.date)
-    from RECORDS join TYPES on RECORDS.type=TYPES.id
-    where strftime('%Y',RECORDS.date) = '{self.current_year}' and TYPES.title='Доход'
-    group by strftime('%m',RECORDS.date)''')
+            self.cur.execute(.execute("""select sum(s),month
+            from (select summa as s,strftime('%m',date) as month
+            from RECORDS where type=1
+            union
+            select -summa as s,strftime('%m',date) as month from RECORDS where type=2) group by month""")
             for s,m in self.cur.fetchall():
                 months_[months_dict[m]] += s
-            self.cur.execute(f'''select sum(RECORDS.summa),strftime('%m',RECORDS.date)
-    from RECORDS join TYPES on RECORDS.type=TYPES.id
-    where strftime('%Y',RECORDS.date) = '{self.current_year}' and TYPES.title='Расход'
-    group by strftime('%m',RECORDS.date)''')
-            for s,m in self.cur.fetchall():
-                months_[months_dict[m]] -= s
         figure = plt.figure(figsize=(12, 5))
         plt.bar(x=months_.keys(),height=months_.values())
 
